@@ -7,25 +7,24 @@ import com.mpatric.mp3agic.Mp3File;
 import java.nio.file.Path;
 
 class TrackInfo {
-    private String path;
+    private Path path;
     private String parentFolder;
     private String filename;
     private String errorMsg;
     private Mp3File tag;
-    private boolean isBroken;
 
     TrackInfo(Path path) {
+        this.path = path;
+        parentFolder = path.getParent().toString();
+        filename = path.getFileName().toString();
         try {
-            parentFolder = path.getParent().toString();
-            filename = path.getFileName().toString();
             tag = new Mp3File(path);
         } catch (Exception e) {
             errorMsg = e.getMessage();
-            isBroken = true;
         }
     }
 
-    String getPath() {
+    Path getPath() {
         return path;
     }
 
@@ -33,7 +32,7 @@ class TrackInfo {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("folder: %s\n", parentFolder));
         sb.append(String.format("file name: %s\n", filename));
-        if (isBroken) {
+        if (errorMsg != null) {
             sb.append(String.format("is broken: %s\n", errorMsg));
         } else {
             if (tag.hasId3v1Tag()) {

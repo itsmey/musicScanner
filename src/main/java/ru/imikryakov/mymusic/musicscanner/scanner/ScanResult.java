@@ -8,7 +8,7 @@ class ScanResult {
     private Map<String, TrackInfo> storage = new HashMap<>();
 
     void addTrack(TrackInfo track) {
-        storage.put(track.getPath(), track);
+        storage.put(track.getPath().toString(), track);
     }
 
     void printVerboseDescriptions(PrintStream os) {
