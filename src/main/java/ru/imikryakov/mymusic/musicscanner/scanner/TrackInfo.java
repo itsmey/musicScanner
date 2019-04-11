@@ -1,67 +1,65 @@
 package ru.imikryakov.mymusic.musicscanner.scanner;
 
-import java.io.File;
+import com.mpatric.mp3agic.ID3v1;
+import com.mpatric.mp3agic.ID3v2;
+import com.mpatric.mp3agic.Mp3File;
 
-public class TrackInfo {
+import java.nio.file.Path;
+
+class TrackInfo {
     private String path;
-    private String artist;
-    private String title;
-    private Integer track;
-    private String album;
+    private String parentFolder;
+    private String filename;
     private String errorMsg;
+    private Mp3File tag;
+    private boolean isBroken;
 
-    TrackInfo(String path) {
-        this.path = path;
-    }
-
-    void setArtist(String artist) {
-        this.artist = artist;
-    }
-
-    void setTrack(Integer track) {
-        this.track = track;
-    }
-
-    void setAlbum(String album) {
-        this.album = album;
-    }
-
-    void setTitle(String title) {
-        this.title = title;
-    }
-
-    void setErrorMsg(String errorMsg) {
-        this.errorMsg = errorMsg;
-    }
-
-    String getFolderPath() {
-        return new File(path).getParent();
-    }
-
-    String getFileName() {
-        return new File(path).getName();
-    }
-
-    @Override
-    public String toString() {
-        if (errorMsg != null) {
-            return String.format("file path: %s\n" +
-                    "exception: %s\n",
-                    path,
-                    errorMsg);
-        } else {
-            return String.format("folder: %s\n" +
-                            "file: %s\n" +
-                            "artist: %s\n" +
-                            "album: %s\n" +
-                            "track: %s\n" +
-                            "title: %s\n",
-                    getFolderPath(),
-                    getFileName(),
-                    artist,
-                    album,
-                    track,
-                    title);
+    TrackInfo(Path path) {
+        try {
+            parentFolder = path.getParent().toString();
+            filename = path.getFileName().toString();
+            tag = new Mp3File(path);
+        } catch (Exception e) {
+            errorMsg = e.getMessage();
+            isBroken = true;
         }
+    }
+
+    String getPath() {
+        return path;
+    }
+
+    String getVerboseDescription() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("folder: %s\n", parentFolder));
+        sb.append(String.format("file name: %s\n", filename));
+        if (isBroken) {
+            sb.append(String.format("is broken: %s\n", errorMsg));
+        } else {
+            if (tag.hasId3v1Tag()) {
+                ID3v1 id3v1 = tag.getId3v1Tag();
+                sb.append("id3v1 tag:\n");
+                addID3v1Info(sb, id3v1);
+            } else {
+                sb.append("no id3v1 tag found!\n");
+            }
+            if (tag.hasId3v2Tag()) {
+                ID3v2 id3v2 = tag.getId3v2Tag();
+                sb.append("id3v2 tag:\n");
+                addID3v1Info(sb, id3v2);
+                sb.append(String.format("album artist: %s\n", id3v2.getAlbumArtist()));
+            } else {
+                sb.append("no id3v2 tag found!\n");
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private void addID3v1Info(StringBuilder sb, ID3v1 id3v1or2) {
+        sb.append(String.format("album: %s\n", id3v1or2.getAlbum()));
+        sb.append(String.format("artist: %s\n", id3v1or2.getArtist()));
+        sb.append(String.format("track: %s\n", id3v1or2.getTrack()));
+        sb.append(String.format("title: %s\n", id3v1or2.getTitle()));
     }
 }
