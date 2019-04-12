@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-class TrackScanner {
+public class TrackScanner {
 
-    static ScanResult walk(Path path) {
+    public static ScanResult walk(Path path) {
         ScanResult result = new ScanResult();
         TrackVisitor visitor = new TrackVisitor(result);
         try {

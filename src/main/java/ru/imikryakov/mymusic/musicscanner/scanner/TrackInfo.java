@@ -32,26 +32,33 @@ class TrackInfo {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("folder: %s\n", parentFolder));
         sb.append(String.format("file name: %s\n", filename));
+
         if (errorMsg != null) {
             sb.append(String.format("is broken: %s\n", errorMsg));
-        } else {
-            if (tag.hasId3v1Tag()) {
-                ID3v1 id3v1 = tag.getId3v1Tag();
-                sb.append("id3v1 tag:\n");
-                addID3v1Info(sb, id3v1);
-            } else {
-                sb.append("no id3v1 tag found!\n");
-            }
-            if (tag.hasId3v2Tag()) {
-                ID3v2 id3v2 = tag.getId3v2Tag();
-                sb.append("id3v2 tag:\n");
-                addID3v1Info(sb, id3v2);
-                sb.append(String.format("album artist: %s\n", id3v2.getAlbumArtist()));
-            } else {
-                sb.append("no id3v2 tag found!\n");
-            }
+            return sb.toString();
         }
 
+        if (tag == null) {
+            sb.append("is broken: no id tag section found. Maybe file is not a valid mp3\n");
+            return sb.toString();
+        }
+
+        if (tag.hasId3v1Tag()) {
+            ID3v1 id3v1 = tag.getId3v1Tag();
+            sb.append("id3v1 tag:\n");
+            addID3v1Info(sb, id3v1);
+        } else {
+            sb.append("no id3v1 tag found!\n");
+        }
+
+        if (tag.hasId3v2Tag()) {
+            ID3v2 id3v2 = tag.getId3v2Tag();
+            sb.append("id3v2 tag:\n");
+            addID3v1Info(sb, id3v2);
+            sb.append(String.format("album artist: %s\n", id3v2.getAlbumArtist()));
+        } else {
+            sb.append("no id3v2 tag found!\n");
+        }
         return sb.toString();
     }
 
